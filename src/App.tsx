@@ -33,7 +33,7 @@ interface Choice {
 interface Question {
   scenario: string;
   choices: Choice[];
-  visualType?: 'chiller' | 'fifo' | 'cross_contamination' | 'chemical' | 'pallet' | 'fefo' | 'thawing' | 'ice_scoop' | 'hot_holding' | 'eggs' | 'trash' | 'condensed_milk';
+  visualType?: 'chiller' | 'fifo' | 'cross_contamination' | 'chemical' | 'pallet' | 'fefo' | 'thawing' | 'ice_scoop' | 'hot_holding' | 'eggs' | 'trash' | 'condensed_milk' | 'chiller_packed' | 'cooling' | 'damaged_can' | 'danger_zone';
 }
 
 const questionsData: Question[] = [
@@ -93,6 +93,7 @@ const questionsData: Question[] = [
   },
   {
     "scenario": "Peti chiller kedai didapati terlalu padat dengan stok sehingga tiada ruang udara.",
+    "visualType": "chiller_packed",
     "choices": [
       { "text": "Biar sahaja asalkan pintu boleh ditutup rapat.", "effect": { "modal": -60, "rep": -10 }, "isCorrect": false, "explanation": "Salah. Udara sejuk perlu beredar untuk mengekalkan suhu 4°C. Chiller padat akan menjadi panas." },
       { "text": "Kurangkan stok, susun semula supaya ada ruang untuk pengedaran udara sejuk.", "effect": { "modal": 30, "rep": 10 }, "isCorrect": true, "explanation": "Betul! Chiller yang tidak padat berfungsi dengan cekap dan memanjangkan hayat makanan." }
@@ -131,6 +132,7 @@ const questionsData: Question[] = [
   },
   {
     "scenario": "Kari lebihan hari ini sangat banyak. Anda mahu simpan di dalam chiller untuk dijual esok.",
+    "visualType": "cooling",
     "choices": [
       { "text": "Masukkan periuk besar yang masih panas berasap terus ke dalam chiller.", "effect": { "modal": -50, "rep": -15 }, "isCorrect": false, "explanation": "Salah! Makanan panas akan menaikkan suhu chiller dan merosakkan makanan lain di dalamnya." },
       { "text": "Sejukkan pada suhu bilik (maksimum 2 jam), pindah ke bekas kecil, baru masuk chiller.", "effect": { "modal": 30, "rep": 10 }, "isCorrect": true, "explanation": "Kaedah penyejukan yang tepat. Bekas kecil mempercepatkan proses makanan sejuk di chiller." }
@@ -161,6 +163,7 @@ const questionsData: Question[] = [
   },
   {
     "scenario": "Label pada tin pes tomato telah terkoyak dan tarikh luput tidak dapat dibaca.",
+    "visualType": "damaged_can",
     "choices": [
       { "text": "Buka sedikit, jika bau dan warnanya elok, gunakan segera.", "effect": { "modal": -40, "rep": -20 }, "isCorrect": false, "explanation": "Risiko tinggi. Bakteria dalam makanan tin (C. botulinum) tidak selalu berbau busuk tetapi mematikan." },
       { "text": "Asingkan, tandakan 'JANGAN GUNA' dan lupuskan/pulangkan jika ragu-ragu.", "effect": { "modal": -10, "rep": 15 }, "isCorrect": true, "explanation": "Peraturan emas dapur: Apabila ragu-ragu, buang sahaja (When in doubt, throw it out)." }
@@ -168,6 +171,7 @@ const questionsData: Question[] = [
   },
   {
     "scenario": "Suhu bahaya (Danger Zone) di mana bakteria membiak paling pantas adalah antara:",
+    "visualType": "danger_zone",
     "choices": [
       { "text": "5°C hingga 60°C", "effect": { "modal": 30, "rep": 10 }, "isCorrect": true, "explanation": "Tepat! Pastikan makanan sejuk di bawah 5°C, dan makanan panas di atas 60°C." },
       { "text": "-18°C hingga 4°C", "effect": { "modal": -20, "rep": -10 }, "isCorrect": false, "explanation": "Salah. Itu adalah suhu selamat untuk penyimpanan chiller and freezer." }
@@ -406,6 +410,71 @@ const WarehouseVisual = ({ type }: { type: Question['visualType'] }) => {
               <div className="w-10 h-10 bg-white border border-blue-100 rounded-full shadow-sm" />
             </div>
             <div className="text-[10px] font-bold text-blue-600 uppercase">PINDAH KE BEKAS BARU</div>
+          </div>
+        );
+      case 'chiller_packed':
+        return (
+          <div className="w-full h-40 bg-slate-100 rounded-xl border-4 border-slate-300 flex flex-col p-1 relative overflow-hidden">
+            <div className="flex-1 grid grid-cols-6 gap-1">
+              {[...Array(18)].map((_, i) => (
+                <div key={i} className="bg-slate-400 rounded-sm shadow-inner" />
+              ))}
+            </div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="bg-red-600/90 text-white text-[10px] font-black px-3 py-1 rounded-full animate-pulse">TIADA PENGEDARAN UDARA!</div>
+            </div>
+          </div>
+        );
+      case 'cooling':
+        return (
+          <div className="w-full h-40 bg-orange-50 rounded-xl border-2 border-orange-200 flex items-center justify-center gap-6">
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-16 h-12 bg-slate-400 rounded-t-lg relative">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-4 h-6 bg-slate-300/40 rounded-full blur-sm animate-bounce" />
+              </div>
+              <div className="text-[8px] font-bold text-slate-500 uppercase">PERIUK BESAR (PANAS)</div>
+            </div>
+            <ChevronRight className="w-6 h-6 text-orange-300" />
+            <div className="flex gap-2">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="w-10 h-8 bg-blue-100 border border-blue-200 rounded-md flex items-center justify-center">
+                  <div className="w-6 h-4 bg-orange-200 rounded-sm" />
+                </div>
+              ))}
+            </div>
+            <div className="text-[8px] font-bold text-blue-600 uppercase">BEKAS KECIL (CEPAT SEJUK)</div>
+          </div>
+        );
+      case 'damaged_can':
+        return (
+          <div className="w-full h-40 bg-white rounded-xl border-2 border-slate-200 flex items-center justify-center gap-8">
+            <div className="w-16 h-20 bg-slate-300 rounded-md relative border-2 border-slate-400">
+              <div className="absolute top-4 -left-1 w-4 h-4 bg-slate-400 rounded-full border-2 border-slate-500" title="Kemik" />
+              <div className="absolute bottom-2 inset-x-2 h-1 bg-red-400/50" title="Karat" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <XCircle className="w-8 h-8 text-red-600/40" />
+              </div>
+            </div>
+            <div className="flex flex-col gap-2">
+              <div className="text-[10px] font-black text-red-600 uppercase">TIN ROSAK / TIADA LABEL</div>
+              <div className="text-[8px] font-bold text-slate-400 uppercase">ASINGKAN & JANGAN GUNA</div>
+            </div>
+          </div>
+        );
+      case 'danger_zone':
+        return (
+          <div className="w-full h-40 bg-slate-50 rounded-xl border-2 border-slate-200 flex flex-col p-4">
+            <div className="flex-1 flex items-center relative">
+              <div className="absolute inset-y-0 left-0 w-full h-4 bg-gradient-to-r from-blue-500 via-red-500 to-orange-500 rounded-full" />
+              <div className="absolute left-[5%] -top-6 text-[8px] font-bold text-blue-600">0°C</div>
+              <div className="absolute left-[30%] -top-6 text-[8px] font-bold text-red-600">5°C</div>
+              <div className="absolute left-[70%] -top-6 text-[8px] font-bold text-red-600">60°C</div>
+              <div className="absolute left-[95%] -top-6 text-[8px] font-bold text-orange-600">100°C</div>
+              
+              <div className="absolute left-[30%] right-[30%] -bottom-6 h-6 border-x-2 border-red-500 flex items-center justify-center">
+                <div className="text-[10px] font-black text-red-600 uppercase animate-pulse">ZON BAHAYA</div>
+              </div>
+            </div>
           </div>
         );
       default:
